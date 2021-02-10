@@ -31,7 +31,14 @@ export class StockFinder {
         <input id="stock-symbol" ref={el => (this.stockNameInput = el)} />
         <button type="submit">Find</button>
       </form>,
-      <ul>{this.searchResults && this.searchResults.map(result => <li>{result.symbol} | {result.name}</li>)}</ul>,
+      <ul>
+        {this.searchResults &&
+          this.searchResults.map(result => (
+            <li>
+              <strong>{result.symbol}</strong> - {result.name}
+            </li>
+          ))}
+      </ul>,
     ];
   }
 }
