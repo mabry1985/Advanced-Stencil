@@ -32,6 +32,7 @@ declare global {
 }
 declare namespace LocalJSX {
     interface JmStockFinder {
+        "onJmSymbolSelected"?: (event: CustomEvent<string>) => void;
     }
     interface JmStockPrice {
         "stockSymbol"?: string;

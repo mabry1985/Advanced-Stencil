@@ -11,5 +11,13 @@
   <body>
     <jm-stock-price stock-symbol="AAPL"></jm-stock-price>
     <jm-stock-finder></jm-stock-finder>
+  <script>
+    const stockFinderEl = document.querySelector('jm-stock-finder');
+    console.log("script is running");
+    stockFinderEl.addEventListener('jmSymbolSelected', event => {
+      console.log('clicked result')
+      console.log(event);
+    });
+  </script>
   </body>
 </html>

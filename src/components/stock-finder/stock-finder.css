@@ -53,6 +53,13 @@ li {
   margin: 0.25rem 0;
   padding: 0.25rem;
   border: 1px solid #ccc;
+  cursor: pointer;
+}
+
+li:hover,
+li:active {
+  background: rgb(155, 0, 155);
+  color: white;
 }
 
 
