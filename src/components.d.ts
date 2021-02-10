@@ -6,6 +6,8 @@
  */
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
 export namespace Components {
+    interface JmSpinner {
+    }
     interface JmStockFinder {
     }
     interface JmStockPrice {
@@ -13,6 +15,12 @@ export namespace Components {
     }
 }
 declare global {
+    interface HTMLJmSpinnerElement extends Components.JmSpinner, HTMLStencilElement {
+    }
+    var HTMLJmSpinnerElement: {
+        prototype: HTMLJmSpinnerElement;
+        new (): HTMLJmSpinnerElement;
+    };
     interface HTMLJmStockFinderElement extends Components.JmStockFinder, HTMLStencilElement {
     }
     var HTMLJmStockFinderElement: {
@@ -26,11 +34,14 @@ declare global {
         new (): HTMLJmStockPriceElement;
     };
     interface HTMLElementTagNameMap {
+        "jm-spinner": HTMLJmSpinnerElement;
         "jm-stock-finder": HTMLJmStockFinderElement;
         "jm-stock-price": HTMLJmStockPriceElement;
     }
 }
 declare namespace LocalJSX {
+    interface JmSpinner {
+    }
     interface JmStockFinder {
         "onJmSymbolSelected"?: (event: CustomEvent<string>) => void;
     }
@@ -38,6 +49,7 @@ declare namespace LocalJSX {
         "stockSymbol"?: string;
     }
     interface IntrinsicElements {
+        "jm-spinner": JmSpinner;
         "jm-stock-finder": JmStockFinder;
         "jm-stock-price": JmStockPrice;
     }
@@ -46,6 +58,7 @@ export { LocalJSX as JSX };
 declare module "@stencil/core" {
     export namespace JSX {
         interface IntrinsicElements {
+            "jm-spinner": LocalJSX.JmSpinner & JSXBase.HTMLAttributes<HTMLJmSpinnerElement>;
             "jm-stock-finder": LocalJSX.JmStockFinder & JSXBase.HTMLAttributes<HTMLJmStockFinderElement>;
             "jm-stock-price": LocalJSX.JmStockPrice & JSXBase.HTMLAttributes<HTMLJmStockPriceElement>;
         }
