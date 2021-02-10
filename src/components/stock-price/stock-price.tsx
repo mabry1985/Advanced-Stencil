@@ -1,4 +1,6 @@
-import { Component, h } from '@stencil/core';
+import { Component, h, State } from '@stencil/core';
+
+import { AV_API_KEY } from '../../global/global';
 
 @Component({
   tag: 'jm-stock-price',
@@ -6,9 +8,20 @@ import { Component, h } from '@stencil/core';
   shadow: true,
 })
 export class StockPrice {
-  onFetchStockPrice(event: Event) {
+  @State() fetchedPrice: number;
+
+  onFetchStockPrice = (event: Event) => {
     event.preventDefault();
-    console.log("Submitted");
+    fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=IBM&apikey=${AV_API_KEY}`)
+      .then(res => {
+        return res.json();
+      })
+      .then(parsedRes => {
+        this.fetchedPrice = +parsedRes['Global Quote']['05. price']
+      })
+      .catch(err => {
+        console.log(err);
+      });
   }
 
   render() {
@@ -18,7 +31,7 @@ export class StockPrice {
         <button type="submit">Fetch</button>
       </form>,
       <div>
-        <p>Price: {0}</p>
+        <p>Price: ${this.fetchedPrice}</p>
       </div>,
     ];
   }
