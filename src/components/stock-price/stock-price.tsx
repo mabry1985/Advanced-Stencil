@@ -116,6 +116,9 @@ export class StockPrice {
     if (this.fetchedPrice) {
       dataContent = <p>Price: ${this.fetchedPrice}</p>;
     }
+    if (this.loading) {
+      dataContent = <jm-spinner />
+    }
 
     return [
       <form onSubmit={this.onFetchStockPrice}>

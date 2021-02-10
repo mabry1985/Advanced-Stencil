@@ -11,11 +11,13 @@ export class StockFinder {
   stockNameInput: HTMLInputElement;
 
   @State() searchResults: { symbol: string; name: string }[];
+  @State() loading = false;
 
-  @Event({bubbles: true, composed: true}) jmSymbolSelected: EventEmitter<string>;
+  @Event({ bubbles: true, composed: true }) jmSymbolSelected: EventEmitter<string>;
 
   onFindStocks = (event: Event) => {
     event.preventDefault();
+    this.loading = true;
     const stockName = this.stockNameInput.value;
     fetch(`https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${stockName}&apikey=${AV_API_KEY}`)
       .then(res => res.json())
@@ -23,8 +25,12 @@ export class StockFinder {
         this.searchResults = parsedRes['bestMatches'].map(match => {
           return { name: match['2. name'], symbol: match['1. symbol'] };
         });
+        this.loading = false;
       })
-      .catch(err => console.log(err));
+      .catch(err => {
+        console.log(err);
+        this.loading = false;
+      });
   };
 
   onSelectSymbol(symbol: string) {
@@ -32,11 +38,7 @@ export class StockFinder {
   }
 
   render() {
-    return [
-      <form onSubmit={this.onFindStocks}>
-        <input id="stock-symbol" ref={el => (this.stockNameInput = el)} />
-        <button type="submit">Find</button>
-      </form>,
+    let content = (
       <ul>
         {this.searchResults &&
           this.searchResults.map(result => (
@@ -44,7 +46,17 @@ export class StockFinder {
               <strong>{result.symbol}</strong> - {result.name}
             </li>
           ))}
-      </ul>,
+      </ul>
+    );
+    if (this.loading) {
+      content = <jm-spinner />;
+    }
+    return [
+      <form onSubmit={this.onFindStocks}>
+        <input id="stock-symbol" ref={el => (this.stockNameInput = el)} />
+        <button type="submit">Find</button>
+      </form>,
+      content
     ];
   }
 }
