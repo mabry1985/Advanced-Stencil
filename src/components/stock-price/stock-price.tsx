@@ -1,4 +1,4 @@
-import { Component, Element, h, Prop, State, Watch } from '@stencil/core';
+import { Component, Element, h, Listen, Prop, State, Watch } from '@stencil/core';
 
 import { AV_API_KEY } from '../../global/global';
 
@@ -17,13 +17,15 @@ export class StockPrice {
   @State() stockUserInput: string;
   @State() stockInputValid = false;
   @State() error: string;
+  @State() loading = false;
 
-  @Prop({ mutable: true, reflect: true}) stockSymbol: string;
+  @Prop({ mutable: true, reflect: true }) stockSymbol: string;
 
   @Watch('stockSymbol')
   stockSymbolChanged(newValue: string, oldValue: string) {
     if (newValue !== oldValue) {
       this.stockUserInput = newValue;
+      this.stockInputValid = true;
       this.fetchStockPrice(newValue);
     }
   }
@@ -35,7 +37,7 @@ export class StockPrice {
     } else {
       this.stockInputValid = false;
     }
-  }
+  };
 
   onFetchStockPrice = (event: Event) => {
     event.preventDefault();
@@ -44,7 +46,44 @@ export class StockPrice {
     //this.fetchStockPrice(stockSymbol);
   };
 
+  componentWillLoad() {
+    console.log('componentWillLoad()');
+    if (this.stockSymbol) {
+      // this.initialStockSymbol = this.stockSymbol;
+      this.stockUserInput = this.stockSymbol;
+      this.stockInputValid = true;
+      this.fetchStockPrice(this.stockSymbol);
+    }
+  }
+
+  componentDidLoad() {
+    console.log('componentDidLoad()');
+  }
+
+  componentWillUpdate() {
+    console.log('componentWillUpdate()');
+  }
+
+  componentDidUpdate() {
+    console.log('componentDidUpdate()');
+    // if (this.stockSymbol !== this.initialStockSymbol) {
+    //   this.initialStockSymbol = this.stockSymbol;
+    //   this.fetchStockPrice(this.stockSymbol);
+    // }
+  }
+
+  disconnectedCallback() {}
+
+  @Listen('jmSymbolSelected', { target: 'body' })
+  onStockSymbolSelected(event: CustomEvent) {
+    console.log('stock symbol selected: ' + event.detail);
+    if (event.detail && event.detail !== this.stockSymbol) {
+      this.stockSymbol = event.detail;
+    }
+  }
+
   private fetchStockPrice(stockSymbol: string) {
+    this.loading = true;
     fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${stockSymbol}&apikey=${AV_API_KEY}`)
       .then(res => {
         return res.json();
@@ -55,47 +94,24 @@ export class StockPrice {
         }
         this.error = null;
         this.fetchedPrice = +parsedRes['Global Quote']['05. price'];
+        this.loading = false;
       })
       .catch(err => {
         this.error = err.message;
+        this.fetchedPrice = null;
         console.log(err);
+        this.loading = false;
       });
   }
 
-  componentWillLoad() {
-    console.log("componentWillLoad()")
-    if (this.stockSymbol) {
-      // this.initialStockSymbol = this.stockSymbol;
-      this.stockUserInput = this.stockSymbol;
-      this.stockInputValid = true;
-      this.fetchStockPrice(this.stockSymbol);
-    }
-  }
-
-  componentDidLoad() {
-    console.log("componentDidLoad()")
-  }
-
-  componentWillUpdate() {
-    console.log("componentWillUpdate()")
-  }
-
-  componentDidUpdate() {
-    console.log("componentDidUpdate()")
-    // if (this.stockSymbol !== this.initialStockSymbol) {
-    //   this.initialStockSymbol = this.stockSymbol;
-    //   this.fetchStockPrice(this.stockSymbol);
-    // }
-  }
-
-  disconnectedCallback(){
-
+  hostData() {
+    return { class: this.error ? 'error hydrated' : 'hydrated' };
   }
 
   render() {
     let dataContent = <p>Search Stock Symbol</p>;
     if (this.error) {
-      dataContent = <p>{this.error}</p>
+      dataContent = <p>{this.error}</p>;
     }
     if (this.fetchedPrice) {
       dataContent = <p>Price: ${this.fetchedPrice}</p>;
@@ -103,13 +119,12 @@ export class StockPrice {
 
     return [
       <form onSubmit={this.onFetchStockPrice}>
-        <input id="stock-symbol" ref={el => (this.stockInput = el)} value={this.stockUserInput} 
-        onInput={this.onUserInput}/>
-        <button type="submit" disabled={!this.stockInputValid}>Fetch</button>
+        <input id="stock-symbol" ref={el => (this.stockInput = el)} value={this.stockUserInput} onInput={this.onUserInput} />
+        <button type="submit" disabled={!this.stockInputValid || this.loading}>
+          Fetch
+        </button>
       </form>,
-      <div>
-        {dataContent}
-      </div>,
+      <div>{dataContent}</div>,
     ];
   }
 }
